@@ -8,8 +8,11 @@ module qm_icache(
     output wire hit,
     output wire stall,
     output wire [31:0] data,
+    input wire enable,
 
     // to the memory controller (no wishbone yet...)
+    // the cache is currently only backed in 1GBit RAM via this controller
+    // this RAM is mapped 0x80000000 - 0x90000000
     output wire mem_cmd_clk, // we will keep this synchronous to the input clock
     output wire mem_cmd_en,
     output wire [2:0] mem_cmd_instr,
@@ -67,26 +70,40 @@ always @(posedge clk) begin
         mem_cmd_en <= 0;
         mem_cmd_bl <= 0;
         mem_cmd_instr <= 0;
+        mem_cmd_addr <= 0;
         mem_rd_en <= 0;
     end
 end
 
 // read condition
-always @(address) begin
-    if (index_valid == valid_bit && index_tag == address_tag) begin
-        if (address_word == 2'b00)
-            data = lines[index][31:0];
-        else if (address_word == 2'b01)
-            data = lines[index][63:32];
-        else if (address_word == 2'b10)
-            data = lines[index][95:64];
-        else
-            data = lines[index][127:96];
-        hit = 1;
-        stall = 0;
+always @(address, lines) begin
+    if (enable) begin
+        // is this in the RAM region?
+        if (32'h80000000 <= address && address < 32'h90000000) begin
+            // do we have a hit?
+            if (index_valid == valid_bit && index_tag == address_tag) begin
+                if (address_word == 2'b00)
+                    data = lines[index][31:0];
+                else if (address_word == 2'b01)
+                    data = lines[index][63:32];
+                else if (address_word == 2'b10)
+                    data = lines[index][95:64];
+                else
+                    data = lines[index][127:96];
+                hit = 1;
+                stall = 0;
+            end else begin
+                hit = 0;
+                stall = 1;
+            end
+        end else begin
+            hit = 1;
+            stall = 0;
+            data = 32'h00000000;
+        end
     end else begin
         hit = 0;
-        stall = 1;
+        stall = 0;
     end
 end
 
@@ -94,12 +111,12 @@ end
 // read memory and provide it data
 reg [2:0] memory_read_state;
 always @(posedge clk) begin
-    if (stall && !reset) begin
+    if (stall && !reset && enable) begin
         case (memory_read_state)
             0: begin // assert command
                 mem_cmd_instr <= 1; // read
-                mem_cmd_bl <= 4; // four words
-                mem_cmd_addr <= address[29:0]; // from the address we are being asserted
+                mem_cmd_bl <= 3; // four words
+                mem_cmd_addr <= {1'b0, address[28:0]};
                 mem_cmd_en <= 0;
                 memory_read_state <= 1;
             end
