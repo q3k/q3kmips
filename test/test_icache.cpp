@@ -4,7 +4,11 @@
 
 #include "Vqm_icache.h"
 
-
+unsigned int _read_ram_at(unsigned int address)
+{
+    // for now, just return the address
+    return address;
+}
 
 void simulate_memory_controller(Vqm_icache *ic)
 {
@@ -56,7 +60,7 @@ void simulate_memory_controller(Vqm_icache *ic)
                 else
                 {
                     printf("[mem ctrl] command word, %i left\n", current_command.left-1);
-                    ic->mem_rd_data = 0xF0000000 + current_command.addr;
+                    ic->mem_rd_data = _read_ram_at(current_command.addr + (4-current_command.left)*4);
                     ic->mem_rd_empty = 0;
                     current_command.left--;
                 }
@@ -98,8 +102,21 @@ void test_icache(void)
     while (1)
     {
         if (counter == 10)
+        {
+            printf("[TEST] Trying to read from 0x8bedead0...\n");
             icache->enable = 1;
-            icache->address = 0x80bedead;
+            icache->address = 0x8bedead0;
+        }
+        if (counter > 11 && icache->stall == 0 && icache->address != 0x8bedead4)
+        {
+            printf("[TEST] Trying to read from 0x8bedead4 (should take one cycle...)\n");
+            icache->address = 0x8bedead4;
+        }
+        if (counter > 40 && icache->stall == 0 && icache->address != 0x8bedead8)
+        {
+            printf("[TEST] Trying to read from 0x8bedead8 (should take one cycle...)\n");
+            icache->address = 0x8bedead8;
+        }
         if (counter > 100)
             break;
         icache->clk = !icache->clk;
