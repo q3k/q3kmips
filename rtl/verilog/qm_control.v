@@ -65,7 +65,9 @@ module qm_control(
         //  1 - data read from memory
         output wire co_RegWSource,
         // Register writeback enable signal
-        output wire co_RegWrite
+        output wire co_RegWrite,
+        // Unused...
+        output wire co_Branch
     );
 
 always @(opcode, funct) begin
@@ -76,6 +78,7 @@ always @(opcode, funct) begin
             co_MemWrite <= 0;
             co_RegWSource <= 0;
             co_RegWrite <= 1;
+            co_Branch <= 0;
             case (funct)
                 `FUNCT_ADD: <= `ALU_ADD;
                 `FUNCT_ADDU: <= `ALU_ADD;
@@ -99,6 +102,7 @@ always @(opcode, funct) begin
             co_MemWrite <= 0;
             co_RegWSource <= 1;
             co_RegWrite <= 1;
+            co_Branch <= 0;
         end
         `OP_SW: begin
             co_RegDest <= 0;
@@ -107,6 +111,7 @@ always @(opcode, funct) begin
             co_MemWrite <= 1;
             co_RegWSource <= 0;
             co_RegWrite <= 0;
+            co_Branch <= 0;
         end
         6'b001???: // all immediate arith/logic
         default: begin
@@ -115,6 +120,7 @@ always @(opcode, funct) begin
             co_MemWrite <= 0;
             co_RegWSource <= 0;
             co_RegWrite <= 0;
+            co_Branch <= 0;
             case (opcode)
                 `OP_ADDI: co_ALUControl <= `ALU_ADD;
                 `OP_ADDIU: co_ALUControl <= `ALU_ADD;
