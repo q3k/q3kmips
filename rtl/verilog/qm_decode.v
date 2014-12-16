@@ -22,6 +22,7 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 
+/* verilator lint_off UNUSED */
 module qm_decode(
     /// datapath
     // from Fetch
@@ -29,7 +30,7 @@ module qm_decode(
     // backtraced from decode
     input wire [4:0] di_WA,
     input wire di_WE,
-    input wire [31:0] di_WD
+    input wire [31:0] di_WD,
 
     output wire [31:0] do_RSVal,
     output wire [31:0] do_RTVal,

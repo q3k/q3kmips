@@ -39,7 +39,7 @@ module qm_regfile(
 	reg [31:0] rf [31:0];
 	
 	always @(wd3) begin
-		if (we3 && wa != 0) begin
+		if (we3 && wa3 != 0) begin
 			rf[wa3] = wd3;
 		end
 	end
