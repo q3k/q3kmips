@@ -15,12 +15,12 @@ module qm_regfile(
 	reg [31:0] rf [31:0];
 	
 	always @(wd3) begin
-		if (we3) begin
+		if (we3 && wa != 0) begin
 			rf[wa3] = wd3;
 		end
 	end
 	
-	assign rd1 = rf[ra1];
-	assign rd2 = rf[ra2];
+	assign rd1 = (ra1 == 0 ? 0 : rf[ra1]);
+	assign rd2 = (ra2 == 0 ? 0 : rf[ra2]);
 
 endmodule

@@ -76,7 +76,7 @@ always @(posedge clk) begin
 end
 
 // read condition
-always @(address, lines) begin
+always @(*) begin
     if (enable) begin
         // is this in the RAM region?
         if (32'h80000000 <= address && address < 32'h90000000) begin
