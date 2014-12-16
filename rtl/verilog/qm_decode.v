@@ -1,23 +1,46 @@
 module qm_decode(
     /// datapath
-    // input instruction register
+    // from Fetch
     input wire [31:0] di_IR,
-    // output instruction register
-    output wire [31:0] do_IR,
-    // output first operand
-    output wire [31:0] do_A,
-    // output second operand
-    output wire [31:0] do_B,
-    // output immediate
-    output wire [31:0] do_Imm,
+    // backtraced from decode
+    input wire [4:0] di_WA,
+    input wire di_WE,
+    input wire [31:0] di_WD
 
-    // control signals
-    
-    // debug signals
-    input wire [4:0] dbg_wa,
-    input wire dbg_we,
-    input wire [31:0] dbg_wd
+    output wire [31:0] do_RSVal,
+    output wire [31:0] do_RTVal,
+    output wire [31:0] do_Imm,
+    output wire [4:0] do_RS,
+    output wire [4:0] do_RT,
+
+    /// instruction to control unit
+    output wire [5:0] o_Opcode,
+    output wire [5:0] o_Function,
+
+    /// controlpath
+    input wire ci_RegWrite,
+    input wire ci_RegWSource,
+    input wire ci_MemWrite,
+    input wire [3:0] ci_ALUControl,
+    input wire ci_ALUSource,
+    input wire ci_RegDest,
+    input wire ci_Branch,
+
+    output wire co_RegWrite,
+    output wire co_RegWSource,
+    output wire co_MemWrite,
+    output wire [3:0] co_ALUControl,
+    output wire co_ALUSource,
+    output wire co_RegDest
 );
+
+// passthrough
+assign co_RegWrite = ci_RegWrite;
+assign co_RegWSource = ci_RegWSource;
+assign co_MemWrite = ci_MemWrite;
+assign co_ALUControl = ci_ALUControl;
+assign co_ALUSource = ci_ALUSource;
+assign co_RegDest = ci_RegDest;
 
 // internal signals from the IR
 wire [4:0] rs;
@@ -31,18 +54,19 @@ assign imm = di_IR[15:0];
 qm_regfile regfile(
     .ra1(rs),
     .ra2(rt),
-    .rd1(do_A),
-    .rd2(do_B),
-
-    // unused
-    .wa3(dbg_wa),
-    .we3(dbg_we),
-    .wd3(dbg_wd)
+    .rd1(do_RSVal),
+    .rd2(do_RTVal),
+    .wa3(di_WA),
+    .we3(di_WE),
+    .wd3(di_WD)
 );
 
 // sign extend imm
 assign do_Imm[31:0] = { {16{imm[15]}}, imm[15:0] };
+assign do_RS = rs;
+assign do_RT = rt;
 
-assign do_IR = di_IR;
+assign o_Opcode = di_IR[31:26];
+assign o_Function = di_IR[5:0];
 
 endmodule

@@ -44,38 +44,38 @@
 
 module qm_control(
         /// Instruction from the decode stage
-        input wire [5:0] opcode,
-        input wire [5:0] funct,
+        input wire [5:0] i_Opcode,
+        input wire [5:0] i_Function,
 
         /// Control lines to the pipeline stages
         // Mux selecting the destination register for the register writeback
         //  0 - RT
         //  1 - RD
-        output wire reg_destination,
+        output wire co_RegDest,
         // Mux selecting the source of the ALU B operand
         //  0 - Value of RT register
         //  1 - instruction Imediate part
-        output wire alu_source,
+        output wire co_ALUSource,
         // ALU Control signal, select ALU operation
-        output wire [3:0] alu_control,
+        output wire [3:0] co_ALUControl,
         // Memory write enable signal
-        output wire mem_write,
+        output wire co_MemWrite,
         // Mux selecting the source of the data for the register writeback
         //  0 - output of ALU
         //  1 - data read from memory
-        output wire reg_wsource,
+        output wire co_RegWSource,
         // Register writeback enable signal
-        output wire reg_write
+        output wire co_RegWrite
     );
 
 always @(opcode, funct) begin
     case (opcode)
         `OP_SPECIAL: begin
-            reg_destination <= 1;
-            alu_source <= 0;
-            mem_write <= 0;
-            reg_wsource <= 0;
-            reg_write <= 1;
+            co_RegDest <= 1;
+            co_ALUSource <= 0;
+            co_MemWrite <= 0;
+            co_RegWSource <= 0;
+            co_RegWrite <= 1;
             case (funct)
                 `FUNCT_ADD: <= `ALU_ADD;
                 `FUNCT_ADDU: <= `ALU_ADD;
@@ -93,36 +93,36 @@ always @(opcode, funct) begin
             endcase
         end
         `OP_LW: begin
-            reg_destination <= 0;
-            alu_source <= 1;
-            alu_control <= 0;
-            mem_write <= 0;
-            reg_wsource <= 1;
-            reg_write <= 1;
+            co_RegDest <= 0;
+            co_ALUSource <= 1;
+            co_ALUControl <= 0;
+            co_MemWrite <= 0;
+            co_RegWSource <= 1;
+            co_RegWrite <= 1;
         end
         `OP_SW: begin
-            reg_destination <= 0;
-            alu_source <= 1;
-            alu_control <= 0;
-            mem_write <= 1;
-            reg_wsource <= 0;
-            reg_write <= 0;
+            co_RegDest <= 0;
+            co_ALUSource <= 1;
+            co_ALUControl <= 0;
+            co_MemWrite <= 1;
+            co_RegWSource <= 0;
+            co_RegWrite <= 0;
         end
         6'b001???: // all immediate arith/logic
         default: begin
-            reg_destination <= 0;
-            alu_source <= 0;
-            mem_write <= 0;
-            reg_wsource <= 0;
-            reg_write <= 0;
+            co_RegDest <= 0;
+            co_ALUSource <= 0;
+            co_MemWrite <= 0;
+            co_RegWSource <= 0;
+            co_RegWrite <= 0;
             case (opcode)
-                `OP_ADDI: alu_control <= `ALU_ADD;
-                `OP_ADDIU: alu_control <= `ALU_ADD;
-                `OP_ANDI: alu_control <= `ALU_AND;
-                `OP_ORI: alu_control <= `ALU_OR;
-                `OP_XORI: alu_control <= `ALU_XOR;
-                `OP_SLTI: alu_control <= `ALU_SLT;
-                `OP_SLTIU: alu_control <= `ALU_SLTIU;
+                `OP_ADDI: co_ALUControl <= `ALU_ADD;
+                `OP_ADDIU: co_ALUControl <= `ALU_ADD;
+                `OP_ANDI: co_ALUControl <= `ALU_AND;
+                `OP_ORI: co_ALUControl <= `ALU_OR;
+                `OP_XORI: co_ALUControl <= `ALU_XOR;
+                `OP_SLTI: co_ALUControl <= `ALU_SLT;
+                `OP_SLTIU: co_ALUControl <= `ALU_SLTIU;
             endcase
         end
     endcase
