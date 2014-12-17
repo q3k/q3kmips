@@ -22,8 +22,13 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 
+`include "qm_control.v"
+`include "qm_icache.v"
+`include "qm_fetch.v"
+`include "qm_decode.v"
+
 module qm_top(
-    
+    input wire clk    
 );
 
 /// Controlpath signal inputs
@@ -36,12 +41,12 @@ reg DEC_ALUSource;
 reg DEC_RegDest;
 
 /// Controlpath signal outputs
-reg cdecode_RegWrite;
-reg cdecode_RegWSource;
-reg cdecode_MemWrite;
-reg [3:0] cdecode_ALUControl;
-reg cdecode_ALUSource;
-reg cdecode_RegDest;
+wire cdecode_RegWrite;
+wire cdecode_RegWSource;
+wire cdecode_MemWrite;
+wire [3:0] cdecode_ALUControl;
+wire cdecode_ALUSource;
+wire cdecode_RegDest;
 
 /// Datapath signal inputs
 // Fetch / Decode
@@ -86,7 +91,7 @@ always @(posedge clk) begin
     DE_RT <= decode_RT;
 
     DEC_RegWrite <= cdecode_RegWrite;
-    DEC_REGWSource <= cdecode_RegWSource;
+    DEC_RegWSource <= cdecode_RegWSource;
     DEC_MemWrite <= cdecode_MemWrite;
     DEC_ALUControl <= cdecode_ALUControl;
     DEC_ALUSource <= cdecode_ALUSource;
@@ -104,16 +109,16 @@ wire control_RegWSource;
 wire control_RegWrite;
 wire control_Branch;
 qm_control control(
-    i_Opcode(decode_Opcode),
-    i_Function(decode_Function),
+    .i_Opcode(decode_Opcode),
+    .i_Function(decode_Function),
     
-    co_RegDest(control_RegDest),
-    co_ALUSource(control_ALUSource),
-    co_ALUControl(control_ALUControl),
-    co_MemWrite(control_MemWrite),
-    co_RegWSource(control_RegWSource),
-    co_RegWrite(control_RegWrite),
-    co_Branch(control_Branch)
+    .co_RegDest(control_RegDest),
+    .co_ALUSource(control_ALUSource),
+    .co_ALUControl(control_ALUControl),
+    .co_MemWrite(control_MemWrite),
+    .co_RegWSource(control_RegWSource),
+    .co_RegWrite(control_RegWrite),
+    .co_Branch(control_Branch)
 );
 // ICache
 qm_icache icache(
@@ -147,27 +152,26 @@ qm_decode decode(
     .do_RS(decode_RS),
     .do_RT(decode_RT),
 
-    di_WA(0),
-    di_WE(0),
-    di_WD(0),
+    .di_WA(0),
+    .di_WE(0),
+    .di_WD(0),
 
-    o_Opcode(decode_Opcode),
-    o_Function(decode_Function),
+    .o_Opcode(decode_Opcode),
+    .o_Function(decode_Function),
 
-    ci_RegWrite(control_RegWrite),
-    ci_RegWSource(control_RegWSource),
-    ci_MemWrite(control_MemWrite),
-    ci_ALUControl(control_ALUControl),
-    ci_ALUSource(control_ALUSource),
-    ci_RegDest(control_RegDest),
+    .ci_RegWrite(control_RegWrite),
+    .ci_RegWSource(control_RegWSource),
+    .ci_MemWrite(control_MemWrite),
+    .ci_ALUControl(control_ALUControl),
+    .ci_ALUSource(control_ALUSource),
+    .ci_RegDest(control_RegDest),
 
-    co_RegDest(cdecode_RegDest),
-    co_ALUSource(cdecode_ALUSource),
-    co_ALUControl(cdecode_ALUControl),
-    co_MemWrite(cdecode_MemWrite),
-    co_RegWSource(cdecode_RegWSource),
-    co_RegWrite(cdecode_RegWrite),
-   
+    .co_RegDest(cdecode_RegDest),
+    .co_ALUSource(cdecode_ALUSource),
+    .co_ALUControl(cdecode_ALUControl),
+    .co_MemWrite(cdecode_MemWrite),
+    .co_RegWSource(cdecode_RegWSource),
+    .co_RegWrite(cdecode_RegWrite)
 );
 
 endmodule

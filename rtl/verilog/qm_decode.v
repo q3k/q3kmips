@@ -22,6 +22,8 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 
+`include "qm_regfile.v"
+
 /* verilator lint_off UNUSED */
 module qm_decode(
     /// datapath

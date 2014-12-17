@@ -29,24 +29,24 @@ module qm_icache(
     input wire clk,
 
     // to the consumer (CPU fetch stage)
-    output wire hit,
-    output wire stall,
-    output wire [31:0] data,
+    output reg hit,
+    output reg stall,
+    output reg [31:0] data,
     input wire enable,
 
     // to the memory controller (no wishbone yet...)
     // the cache is currently only backed in 1GBit RAM via this controller
     // this RAM is mapped 0x80000000 - 0x90000000
     output wire mem_cmd_clk, // we will keep this synchronous to the input clock
-    output wire mem_cmd_en,
-    output wire [2:0] mem_cmd_instr,
-    output wire [5:0] mem_cmd_bl,
-    output wire [29:0] mem_cmd_addr,
+    output reg mem_cmd_en,
+    output reg [2:0] mem_cmd_instr,
+    output reg [5:0] mem_cmd_bl,
+    output reg [29:0] mem_cmd_addr,
     input wire mem_cmd_full,
     input wire mem_cmd_empty,
 
     output wire mem_rd_clk,
-    output wire mem_rd_en,
+    output reg mem_rd_en,
     input wire [6:0] mem_rd_count,
     input wire mem_rd_full,
     input wire [31:0] mem_rd_data,

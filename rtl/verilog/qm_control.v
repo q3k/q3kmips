@@ -75,85 +75,94 @@ module qm_control(
         // Mux selecting the destination register for the register writeback
         //  0 - RT
         //  1 - RD
-        output wire co_RegDest,
+        output reg co_RegDest,
         // Mux selecting the source of the ALU B operand
         //  0 - Value of RT register
         //  1 - instruction Imediate part
-        output wire co_ALUSource,
+        output reg co_ALUSource,
         // ALU Control signal, select ALU operation
-        output wire [3:0] co_ALUControl,
+        output reg [3:0] co_ALUControl,
         // Memory write enable signal
-        output wire co_MemWrite,
+        output reg co_MemWrite,
         // Mux selecting the source of the data for the register writeback
         //  0 - output of ALU
         //  1 - data read from memory
-        output wire co_RegWSource,
+        output reg co_RegWSource,
         // Register writeback enable signal
-        output wire co_RegWrite,
+        output reg co_RegWrite,
         // Unused...
-        output wire co_Branch
+        output reg co_Branch
     );
 
-always @(opcode, funct) begin
-    case (opcode)
+always @(i_Opcode, i_Function) begin
+    case (i_Opcode)
         `OP_SPECIAL: begin
-            co_RegDest <= 1;
-            co_ALUSource <= 0;
-            co_MemWrite <= 0;
-            co_RegWSource <= 0;
-            co_RegWrite <= 1;
-            co_Branch <= 0;
-            case (funct)
-                `FUNCT_ADD: <= `ALU_ADD;
-                `FUNCT_ADDU: <= `ALU_ADD;
-                `FUNCT_AND: <= `ALU_AND;
-                `FUNCT_DIV: <= `ALU_DIV;
-                `FUNCT_DIVU: <= `ALU_DIV;
-                `FUNCT_MULT: <= `ALU_MUL;
-                `FUNCT_MULTU: <= `ALU_MUL;
-                `FUNCT_NOR: <= `ALU_NOR
-                `FUNCT_OR: <= `ALU_OR;
-                `FUNCT_SLT: <= `ALU_SLT;
-                `FUNCT_SUB: <= `ALU_SUB;
-                `FUNCT_SUBU: <= `ALU_SUB;
-                `FUNCT_XOR: <= `ALU_XOR;
+            co_RegDest = 1;
+            co_ALUSource = 0;
+            co_MemWrite = 0;
+            co_RegWSource = 0;
+            co_RegWrite = 1;
+            co_Branch = 0;
+            case (i_Function)
+                `FUNCT_ADD: co_ALUControl = `ALU_ADD;
+                `FUNCT_ADDU: co_ALUControl = `ALU_ADD;
+                `FUNCT_AND: co_ALUControl = `ALU_AND;
+                `FUNCT_DIV: co_ALUControl = `ALU_DIV;
+                `FUNCT_DIVU: co_ALUControl = `ALU_DIV;
+                `FUNCT_MULT: co_ALUControl = `ALU_MUL;
+                `FUNCT_MULTU: co_ALUControl = `ALU_MUL;
+                `FUNCT_NOR: co_ALUControl = `ALU_NOR;
+                `FUNCT_OR: co_ALUControl = `ALU_OR;
+                `FUNCT_SLT: co_ALUControl = `ALU_SLT;
+                `FUNCT_SUB: co_ALUControl = `ALU_SUB;
+                `FUNCT_SUBU: co_ALUControl = `ALU_SUB;
+                `FUNCT_XOR: co_ALUControl = `ALU_XOR;
             endcase
         end
         `OP_LW: begin
-            co_RegDest <= 0;
-            co_ALUSource <= 1;
-            co_ALUControl <= 0;
-            co_MemWrite <= 0;
-            co_RegWSource <= 1;
-            co_RegWrite <= 1;
-            co_Branch <= 0;
+            co_RegDest = 0;
+            co_ALUSource = 1;
+            co_ALUControl = 0;
+            co_MemWrite = 0;
+            co_RegWSource = 1;
+            co_RegWrite = 1;
+            co_Branch = 0;
         end
         `OP_SW: begin
-            co_RegDest <= 0;
-            co_ALUSource <= 1;
-            co_ALUControl <= 0;
-            co_MemWrite <= 1;
-            co_RegWSource <= 0;
-            co_RegWrite <= 0;
-            co_Branch <= 0;
+            co_RegDest = 0;
+            co_ALUSource = 1;
+            co_ALUControl = 0;
+            co_MemWrite = 1;
+            co_RegWSource = 0;
+            co_RegWrite = 0;
+            co_Branch = 0;
         end
         6'b001???: // all immediate arith/logic
-        default: begin
-            co_RegDest <= 0;
-            co_ALUSource <= 0;
-            co_MemWrite <= 0;
-            co_RegWSource <= 0;
-            co_RegWrite <= 0;
-            co_Branch <= 0;
-            case (opcode)
-                `OP_ADDI: co_ALUControl <= `ALU_ADD;
-                `OP_ADDIU: co_ALUControl <= `ALU_ADD;
-                `OP_ANDI: co_ALUControl <= `ALU_AND;
-                `OP_ORI: co_ALUControl <= `ALU_OR;
-                `OP_XORI: co_ALUControl <= `ALU_XOR;
-                `OP_SLTI: co_ALUControl <= `ALU_SLT;
-                `OP_SLTIU: co_ALUControl <= `ALU_SLTIU;
+        begin
+            co_RegDest = 0;
+            co_ALUSource = 1;
+            co_MemWrite = 0;
+            co_RegWSource = 0;
+            co_RegWrite = 1;
+            co_Branch = 0;
+            case (i_Opcode)
+                `OP_ADDI: co_ALUControl = `ALU_ADD;
+                `OP_ADDIU: co_ALUControl = `ALU_ADD;
+                `OP_ANDI: co_ALUControl = `ALU_AND;
+                `OP_ORI: co_ALUControl = `ALU_OR;
+                `OP_XORI: co_ALUControl = `ALU_XOR;
+                `OP_SLTI: co_ALUControl = `ALU_SLT;
+                `OP_SLTIU: co_ALUControl = `ALU_SLT;
             endcase
+        end
+        default: begin
+            co_RegDest = 0;
+            co_ALUSource = 1;
+            co_MemWrite = 0;
+            co_RegWSource = 0;
+            co_RegWrite = 0;
+            co_Branch = 0;
+            co_ALUControl = 0;
         end
     endcase
 end

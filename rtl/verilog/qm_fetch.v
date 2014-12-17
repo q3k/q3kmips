@@ -27,9 +27,9 @@ module qm_fetch(
     // input PC to assume
     input wire [31:0] di_PC,
     // output instruction register
-    output wire [31:0] do_IR,
+    output reg [31:0] do_IR,
     // output to next PC
-    output wire [31:0] do_NextPC,
+    output reg [31:0] do_NextPC,
 
     // icache connectivity
     output wire [31:0] icache_address,
