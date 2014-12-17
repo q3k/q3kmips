@@ -56,8 +56,8 @@ reg [31:0] FD_NextPC;
 reg [31:0] DE_RSVal;
 reg [31:0] DE_RTVal;
 reg [31:0] DE_Imm;
-reg [31:0] DE_RS;
 reg [31:0] DE_RT;
+reg [31:0] DE_RD;
 
 /// Datapath signal outputs
 // Fetch
@@ -67,8 +67,8 @@ wire [31:0] fetch_NextPC;
 wire [31:0] decode_RSVal;
 wire [31:0] decode_RTVal;
 wire [31:0] decode_Imm;
-wire [4:0] decode_RS;
 wire [4:0] decode_RT;
+wire [4:0] decode_RD;
 wire [5:0] decode_Opcode;
 wire [5:0] decode_Function;
 // ICache
@@ -87,8 +87,8 @@ always @(posedge clk) begin
     DE_RSVal <= decode_RSVal;
     DE_RTVal <= decode_RTVal;
     DE_Imm <= decode_Imm;
-    DE_RS <= decode_RS;
     DE_RT <= decode_RT;
+    DE_RD <= decode_RD;
 
     DEC_RegWrite <= cdecode_RegWrite;
     DEC_RegWSource <= cdecode_RegWSource;
@@ -149,8 +149,8 @@ qm_decode decode(
     .do_RSVal(decode_RSVal),
     .do_RTVal(decode_RTVal),
     .do_Imm(decode_Imm),
-    .do_RS(decode_RS),
     .do_RT(decode_RT),
+    .do_RD(decode_RD),
 
     .di_WA(0),
     .di_WE(0),

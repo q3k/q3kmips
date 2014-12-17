@@ -22,77 +22,54 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 
-`include "qm_regfile.v"
+`include "qm_alu.v"
 
-/* verilator lint_off UNUSED */
-module qm_decode(
+module qm_execute(
     /// datapath
-    // from Fetch
-    input wire [31:0] di_IR,
-    // backtraced from decode
-    input wire [4:0] di_WA,
-    input wire di_WE,
-    input wire [31:0] di_WD,
-
-    output wire [31:0] do_RSVal,
-    output wire [31:0] do_RTVal,
-    output wire [31:0] do_Imm,
-    output wire [4:0] do_RT,
-    output wire [4:0] do_RD,
-
-    /// instruction to control unit
-    output wire [5:0] o_Opcode,
-    output wire [5:0] o_Function,
+    // from Decode
+    input wire [31:0] di_RSVal,
+    input wire [31:0] di_RTVal,
+    input wire [31:0] di_Imm,
+    input wire [4:0] di_RT,
+    input wire [4:0] di_RD,
+    // to Memory
+    output wire [31:0] do_ALUOut,
+    output wire [31:0] do_WriteData,
+    output wire [31:0] do_WriteReg,
 
     /// controlpath
+    // from Decode
     input wire ci_RegWrite,
     input wire ci_RegWSource,
     input wire ci_MemWrite,
     input wire [3:0] ci_ALUControl,
     input wire ci_ALUSource,
-    input wire ci_RegDest,
-    input wire ci_Branch,
-
+    input wire ci_RegDest
+    // to Memory
     output wire co_RegWrite,
     output wire co_RegWSource,
-    output wire co_MemWrite,
-    output wire [3:0] co_ALUControl,
-    output wire co_ALUSource,
-    output wire co_RegDest
+    output wire co_MemWrite
 );
 
 // passthrough
 assign co_RegWrite = ci_RegWrite;
 assign co_RegWSource = ci_RegWSource;
 assign co_MemWrite = ci_MemWrite;
-assign co_ALUControl = ci_ALUControl;
-assign co_ALUSource = ci_ALUSource;
-assign co_RegDest = ci_RegDest;
 
-// internal signals from the IR
-wire [4:0] rs;
-wire [4:0] rt;
-wire [15:0] imm;
+assign do_WriteData = di_RTVal;
 
-assign rs = di_IR[25:21];
-assign rt = di_IR[20:16];
-assign imm = di_IR[15:0];
+// Mux to ALU B
+wire ALUB = ci_ALUSource ? di_RTVal : di_Imm;
 
-qm_regfile regfile(
-    .ra1(rs),
-    .ra2(rt),
-    .rd1(do_RSVal),
-    .rd2(do_RTVal),
-    .wa3(di_WA),
-    .we3(di_WE),
-    .wd3(di_WD)
+// Mux to register write index
+assign do_WriteReg = ci_RegDest ? di_RT : di_RD;
+
+qm_alu alu(
+    .i_ALUControl(ci_ALUControl),
+    .i_A(di_RSVal),
+    .i_B(ALUB),
+
+    .o_Result(do_ALUOut)
 );
-
-// sign extend imm
-assign do_Imm[31:0] = { {16{imm[15]}}, imm[15:0] };
-assign do_RT = rt;
-assign do_RD = di_IR[15:11];
-assign o_Opcode = di_IR[31:26];
-assign o_Function = di_IR[5:0];
 
 endmodule
